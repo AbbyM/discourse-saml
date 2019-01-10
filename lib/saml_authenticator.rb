@@ -116,26 +116,26 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     
     if auth.extra.present? && auth.extra[:raw_info].present?
         
-        email_extrafield = GlobalSetting.try(:saml_extrafield_email) || nil
-        firstname_extrafield = GlobalSetting.try(:saml_extrafield_firstname) || nil
-        lastname_extrafield = GlobalSetting.try(:saml_extrafield_lastname) || nil
-        company_extrafield = GlobalSetting.try(:saml_extrafield_company) || nil
+        email_extrafield = GlobalSetting.try(:saml_extrafield_email) || ''
+        firstname_extrafield = GlobalSetting.try(:saml_extrafield_firstname) || ''
+        lastname_extrafield = GlobalSetting.try(:saml_extrafield_lastname) || ''
+        company_extrafield = GlobalSetting.try(:saml_extrafield_company) || ''
         
-        if email_extrafield
+        if !email_extrafield.empty?
             result.email = attributes[email_extrafield].try(:first)
         end
 
-        if firstname_extrafield
+        if !firstname_extrafield.empty?
             result.name = attributes[firstname_extrafield].try(:first)
         end
         
-        if lastname_extrafield && firstname_extrafield
+        if !lastname_extrafield.empty? && !firstname_extrafield.empty?
             result.name = result.name + " " + attributes[lastname_extrafield].try(:first)
         elsif lastname_extrafield
             result.name = attributes[lastname_extrafield].try(:first)
         end
         
-        if company_extrafield && !result.name.empty?
+        if !company_extrafield.empty? && !result.name.empty?
             result.name = result.name + " (" + attributes[company_extrafield].try(:first) + ")"
         end
             
