@@ -114,28 +114,28 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
       username
     end
     
-    if auth.extra.present? && auth.extra[:raw_info].present?
+    if attributes.present?
         
-        email_extrafield = GlobalSetting.try(:saml_extrafield_email) || ''
-        firstname_extrafield = GlobalSetting.try(:saml_extrafield_firstname) || ''
-        lastname_extrafield = GlobalSetting.try(:saml_extrafield_lastname) || ''
-        company_extrafield = GlobalSetting.try(:saml_extrafield_company) || ''
+        email_extrafield = GlobalSetting.try(:saml_extrafield_email).presence || ""
+        firstname_extrafield = GlobalSetting.try(:saml_extrafield_firstname).presence || ""
+        lastname_extrafield = GlobalSetting.try(:saml_extrafield_lastname).presence || ""
+        company_extrafield = GlobalSetting.try(:saml_extrafield_company).presence || ""
         
-        if !email_extrafield.empty?
+        unless email_extrafield.nil? || email_extrafield.empty?
             result.email = attributes[email_extrafield].try(:first)
         end
 
-        if !firstname_extrafield.empty?
-            result.name = attributes[firstname_extrafield].try(:first)
+        unless firstname_extrafield.nil? || firstname_extrafield.empty?
+            result.name = attributes[firstname_extrafield].try(:first) || ""
         end
         
-        if !lastname_extrafield.empty? && !firstname_extrafield.empty?
+        if (lastname_extrafield != nil && !firstname_extrafield.empty?)
             result.name = result.name + " " + attributes[lastname_extrafield].try(:first)
-        elsif lastname_extrafield
-            result.name = attributes[lastname_extrafield].try(:first)
+        elsif (lastname_extrafield != nil)
+            result.name = attributes[lastname_extrafield].try(:first) || ""
         end
         
-        if !company_extrafield.empty? && !result.name.empty?
+        unless company_extrafield.nil? && result.name.empty?
             result.name = result.name + " (" + attributes[company_extrafield].try(:first) + ")"
         end
             
